@@ -1,0 +1,374 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>flickr HTML5</title>
+		<meta charset="utf-8">
+		<style type="text/css">
+			body {
+				font-family: "Helvetica", Arial, sans-serif;
+				font-size:12px;
+				background-color: #f0f0f0;
+				margin: 0px;
+				overflow: hidden;
+			}
+			
+			input[type="text"]:focus {
+				outline: 0px none;
+			}
+			
+			#container{
+				position: absolute;
+				top: 50%;
+				left: 0px;
+				width: 100%;
+				height: 1px;
+				overflow: visible;
+			}
+			
+			#cubeContainer{
+			 	width:1000px;
+				height:1000px;
+				margin-left: -500px;
+				position: absolute;
+				top: -500px;
+				left: 50%;	
+			}
+			
+			#loaderContainer{
+				width:31px;
+				height:31px;
+				margin-left: -15.5px;
+				position: absolute;
+				top: -15.5px;
+				left: 50%;
+			}
+			
+		</style>
+	</head>
+	<body>
+    
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+		
+		<script src="js/jquery.preload-min.js"></script> 
+		
+		<script src="js/three_js/build/Three.js"></script>
+		<script src="js/three_js/src/extras/ImageUtils.js"></script>
+		<script src="js/three_js/src/extras/primitives/Cube.js"></script>
+
+		<script src="js/Tween.js"></script>
+		<script src="js/Stats.js"></script>
+
+		<script type="text/javascript">
+
+			var container;
+			var loaderContainer;
+			var cubeContainer;
+			var stats;
+			var camera, scene, projector, renderer;
+			var numAccross = 4;
+			var colInc = 0;
+			var rowInc = 0;
+			var spaceX = 120;
+			var spaceY = 120;
+			var obArray = [];
+			var urls = [];
+			var blockArray = []; 
+			var geometry;
+			var canvasWidth = 1000;
+			var canvasHeight = 1000;
+			var mouseX = 0;
+			var mouseY = 0;
+			var cubeWidth = 100;
+			var cubeHeight = 100;
+			var cubeDepth = 100;
+			var viewingLarge = false;
+			var flickrId = '37640146@N04';
+
+			init();
+
+			function init() {
+				container = $( '<div id="container" />' );
+				$('body').append( container );
+				container.css({'z-index' : '400'});
+				
+				$('body').append('<div id="nameInput">Enter <strong><span style="color:#0063dc;">flick</span><span style="color:#ff0084;">r</span></strong> ID : <input type="text" name="fid" id="fid"/></div>');
+				$('#nameInput').append('<input id="idSubmitButton" type="submit" name="idSubmit" value="Submit">');
+				$('#nameInput').css({'position' : 'fixed', 'top' : '20px', 'left' : '20px', 'z-index' : '900'});
+
+				$("input#fid").focus();
+				
+			  showLoader();
+				getPictureData();
+				//$.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?id=" + flickrId + "&lang=en-us&format=json&jsoncallback=?", createObjects);
+			}
+			
+			function getPictureData(){
+				$.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?id=" + flickrId + "&lang=en-us&format=json&jsoncallback=?", createObjects); 
+			}
+			
+			function showLoader(){
+				  container.html('');
+					
+					loaderContainer = $( '<div id="loaderContainer" />' );
+					container.append( loaderContainer );
+					loaderContainer.css({'z-index' : '500'});
+					loaderContainer.html('<img src="images/preloader.gif" />')
+			}
+			
+			function createObjects(data) {
+				// Start putting together the HTML string
+				var htmlString = "";
+        
+				// Now start cycling through our array of Flickr photo details
+				$.each(data.items, function(i,item){
+        	obArray.push(item);
+					var thumbUrl = (item.media.m).replace("_m.jpg", "_s.jpg");
+					urls.push(thumbUrl);
+				  /*var sourceSquare = (item.media.m).replace("_m.jpg", "_s.jpg");
+          // Here's where we piece together the HTML
+				  htmlString += '<li><a href="' + item.link + '" target="_blank">';
+				  htmlString += '<img title="' + item.title + '" src="' + sourceSquare;
+				  htmlString += '" alt="'; htmlString += item.title + '" />';
+				  htmlString += '</a></li>';*/
+
+				});
+
+			 	setInterval( loop, 1000 / 60 );  
+				preloadImages();
+			}
+			
+			function preloadImages(){
+				$.preload( urls, {
+					onFinish:createImages
+				});
+			}
+			
+			function createImages(){
+				
+				container.html('');
+				
+				cubeContainer = $( '<div id="cubeContainer" />' );
+				container.append( cubeContainer );
+				cubeContainer.css({'z-index' : '500'});
+
+				//camera = new THREE.Camera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera = new THREE.Camera( 70, 1 / 1, 1, 1000 );
+				camera.position.x = -400;
+				camera.position.y = 0;
+				camera.position.z = 700;
+
+				scene = new THREE.Scene();
+
+				geometry = new Cube( cubeWidth, cubeHeight, cubeDepth );
+				
+				var gh = (((Math.ceil(obArray.length/ (numAccross + 1))) * spaceY) / 2) - (spaceY * 0.5);      
+
+				for ( var i = 0; i < obArray.length; i ++ ) {
+					
+					var materials = [];
+					var thumbUrl = urls[i];
+					
+					for (var c = 0; c < 6; c++) {
+						
+						var clr;
+						
+						if(c == 0){
+							clr = 0x666666;
+						}else if(c == 1){
+							clr = 0x666666;
+						}else if(c == 2){
+						  clr = 0x333333;
+						}else if(c == 3){
+							 clr = 0x333333; 
+						}else if(c == 5){
+              clr = 0x333333;
+						}
+						
+						if(c == 4){
+							var picFace = new THREE.MeshBasicMaterial( { map: ImageUtils.loadTexture( thumbUrl) } );
+							materials.push([picFace]);
+						}else{
+							materials.push( [ new THREE.MeshBasicMaterial( { color: clr } ) ] );
+						}
+					}   
+          
+					var object = new THREE.Mesh( new Cube( cubeWidth, cubeHeight, cubeDepth, 1, 1, materials ), new THREE.MeshFaceMaterial() );
+					blockArray.push(object);
+					//var object = new THREE.Mesh( geometry, [ new THREE.MeshBasicMaterial( { map: ImageUtils.loadTexture( thumbUrl) } ) ] );
+					
+					var targX = (spaceX * colInc) - (((numAccross) * spaceX) / 2);
+					var targY = -(spaceY * rowInc) + gh;
+					
+					if(colInc == numAccross){
+						colInc = 0;
+						rowInc++;
+					}else{
+						colInc++;
+					}
+					
+					object.position.z = -500;
+					object.num = i;
+					object.opacity = 0.1;
+					//object.scale.x = Math.random() * 2 + 1;
+					//object.scale.y = Math.random() * 2 + 1;
+					//object.scale.z = Math.random() * 2 + 1;
+					//object.rotation.x = ( Math.random() * 360 ) * Math.PI / 180;
+					//object.rotation.y = ( Math.random() * 360 ) * Math.PI / 180;
+					//object.rotation.z = ( Math.random() * 360 ) * Math.PI / 180;
+					scene.addObject( object );
+					
+					new TWEEN.Tween( object.position ).to( {
+						x: targX,
+						y: targY,
+						z: 0}, 2000 )
+					.easing( TWEEN.Easing.Exponential.EaseInOut ).delay((i/10) * 1000).start();
+
+					new TWEEN.Tween( object.rotation ).to( {
+						x: 0,
+						y: 0}, 2000 )
+					.easing( TWEEN.Easing.Exponential.EaseInOut ).delay((i/10) * 1000).start();
+
+				}
+
+				projector = new THREE.Projector();
+
+				renderer = new THREE.CanvasRenderer();
+				//renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setSize( canvasWidth , canvasHeight );
+
+				cubeContainer.append(renderer.domElement);
+         
+				//uncomment below for stats
+				/*stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.append( stats.domElement );*/
+        
+        $(document).mousedown(onDocumentMouseDown);
+				$(document).mousemove(onDocumentMouseMove);
+				
+				//$('#idSubmitButton').mouseover(onBtnMouseOver);
+				//$('#idSubmitButton').mouseout(onBtnMouseOver);
+			}
+
+			function onDocumentMouseDown( event ) {
+				
+				if(viewingLarge == false){
+					
+					event.preventDefault();
+				
+					var contPos = container.position();
+					var cubePos = cubeContainer.position(); 
+				
+					var ml = cubeContainer.css('margin-left').substr(0, cubeContainer.css('margin-left').length - 2);
+					var offsetX = cubePos.left + Number(ml);
+				
+					var mt = cubeContainer.css('top').substr(0, cubeContainer.css('top').length - 2);
+					var offsetY = contPos.top + Number(mt);
+
+					//var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+					var vector = new THREE.Vector3( ( (event.clientX - offsetX) / canvasWidth ) * 2 - 1, - ( (event.clientY - offsetY) / canvasHeight ) * 2 + 1, 0.5 );
+					projector.unprojectVector( vector, camera );
+
+					var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
+
+					var intersects = ray.intersectScene( scene );
+
+					if ( intersects.length > 0 ) {
+						
+						viewingLarge = true;
+						$('body').css({'cursor' : 'default'});
+					
+						var numClicked = intersects[ 0 ].object.num;
+						var largeUrl = (obArray[numClicked].media.m).replace("_m.jpg", ".jpg");
+						//alert(largeUrl)
+
+						new TWEEN.Tween( intersects[ 0 ].object.position ).to( {
+							x: 0,
+							y: 0,
+							z: 300}, 2000 )
+							.easing( TWEEN.Easing.Exponential.EaseInOut).start();
+
+					 new TWEEN.Tween( intersects[ 0 ].object.rotation ).to( {
+							x: 0,
+							y: 0,
+							z: 0}, 2000 )
+							.easing( TWEEN.Easing.Exponential.EaseInOut).start();
+					
+					 new TWEEN.Tween( camera.position ).to( {
+							x: 0,
+							y:0,
+							z:1050}, 2000 )
+							.easing( TWEEN.Easing.Exponential.EaseInOut).start();
+						
+					 }
+					
+					fadeOutBlocks();
+
+				 }
+
+				/*
+				// Parse all the faces
+				for ( var i in intersects ) {
+
+					intersects[ i ].face.material[ 0 ].color.setHex( Math.random() * 0xffffff | 0x80000000 );
+
+				}
+				*/
+			}
+			
+			function fadeOutBlocks(ex){
+				for(var i = 0; i<blockArray.length; i++){
+					blockArray[i].face.material[ 0 ].opacity = .3;
+				}
+			}
+			
+			function onDocumentMouseMove(event){
+				
+				if(viewingLarge == false){
+					
+					var contPos = container.position();
+					var cubePos = cubeContainer.position(); 
+				
+					var ml = cubeContainer.css('margin-left').substr(0, cubeContainer.css('margin-left').length - 2);
+					var offsetX = cubePos.left + Number(ml);
+				
+					var mt = cubeContainer.css('top').substr(0, cubeContainer.css('top').length - 2);
+					var offsetY = contPos.top + Number(mt);
+				
+					//var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+			 		var vector = new THREE.Vector3( ( (event.clientX - offsetX) / canvasWidth ) * 2 - 1, - ( (event.clientY - offsetY) / canvasHeight ) * 2 + 1, 0.5 ); 
+					projector.unprojectVector( vector, camera );
+        	var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
+        	var intersects = ray.intersectScene( scene );
+        	if ( intersects.length > 0 ) {
+						$('body').css({'cursor' : 'pointer'});
+					}else{
+						$('body').css({'cursor' : 'default'});
+					}
+				
+				}
+				
+			 	mouseX = event.pageX
+			  mouseY = event.pageY;
+			}
+
+			function loop() {
+
+				TWEEN.update();
+
+				renderer.render(scene, camera);
+				//camera.position.x += (((mouseX-(canvasWidth * .5))*2)-camera.position.x )*.05;
+	      //camera.position.y += (((mouseY-(canvasHeight*.5))*2)-camera.position.y )*.05;
+				
+				$('#cubeContainer').css({'z-index' : '500'});
+				$('#nameInput').css({'z-index' : '900'}); 
+				
+				//uncomment below for stats 
+				//stats.update();
+			}
+
+		</script>
+
+	</body>
+</html>
