@@ -63,6 +63,7 @@
 			var container;
 			var loaderContainer;
 			var cubeContainer;
+			var largeContainer;
 			var stats;
 			var camera, scene, projector, renderer;
 			var numAccross = 4;
@@ -150,6 +151,10 @@
 				cubeContainer = $( '<div id="cubeContainer" />' );
 				container.append( cubeContainer );
 				cubeContainer.css({'z-index' : '500'});
+				
+				largeContainer = $( '<div id="largeContainer" />' );
+				container.append( largeContainer );
+				largeContainer.css({'z-index' : '800'});
 
 				//camera = new THREE.Camera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
 				camera = new THREE.Camera( 70, 1 / 1, 1, 1000 );
@@ -281,7 +286,8 @@
 					
 						var numClicked = intersects[ 0 ].object.num;
 						var largeUrl = (obArray[numClicked].media.m).replace("_m.jpg", ".jpg");
-						//alert(largeUrl)
+						
+						loadImage(largeUrl);
 
 						new TWEEN.Tween( intersects[ 0 ].object.position ).to( {
 							x: 0,
@@ -367,6 +373,18 @@
 				//uncomment below for stats 
 				//stats.update();
 			}
+			
+			function loadImage(imUrl){
+
+        var img = new Image();
+
+      	$(img).load(function () {
+      	  largeContainer.html(this);
+          $(this).fadeIn();
+        });
+
+      	$(img).attr('src', imUrl);
+    }
 
 		</script>
 
