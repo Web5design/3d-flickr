@@ -14,6 +14,19 @@
 			
 			input[type="text"]:focus {
 				outline: 0px none;
+				float:left;
+				position: absolute;
+				left:90px;
+			}
+			
+			input[type="submit"]{
+			  float:left;
+			  position: absolute;
+				left:230px;
+			}
+			
+			#nameInput{
+			  display:block;
 			}
 			
 			#container{
@@ -34,6 +47,13 @@
 				left: 50%;	
 			}
 			
+			#largeContainer{
+			  position: absolute;
+			  width:102px;
+			  height:102px;
+			  overflow:hidden;
+		  }
+			
 			#loaderContainer{
 				width:31px;
 				height:31px;
@@ -41,6 +61,10 @@
 				position: absolute;
 				top: -15.5px;
 				left: 50%;
+			}
+			
+			#fid{
+			  position:absolute;
 			}
 			
 		</style>
@@ -84,6 +108,8 @@
 			var cubeDepth = 100;
 			var viewingLarge = false;
 			var flickrId = '37640146@N04';
+			var lw = 0;
+			var lh = 0;
 
 			init();
 
@@ -92,7 +118,7 @@
 				$('body').append( container );
 				container.css({'z-index' : '400'});
 				
-				$('body').append('<div id="nameInput">Enter <strong><span style="color:#0063dc;">flick</span><span style="color:#ff0084;">r</span></strong> ID : <input type="text" name="fid" id="fid"/></div>');
+				$('body').append('<div id="nameInput"><span style="float:left;margin-top:3px;">Enter <strong><span style="color:#0063dc;">flick</span><span style="color:#ff0084;">r</span></strong> ID :</span> <input type="text" name="fid" id="fid"/></div>');
 				$('#nameInput').append('<input id="idSubmitButton" type="submit" name="idSubmit" value="Submit">');
 				$('#nameInput').css({'position' : 'fixed', 'top' : '20px', 'left' : '20px', 'z-index' : '900'});
 
@@ -287,7 +313,7 @@
 						var numClicked = intersects[ 0 ].object.num;
 						var largeUrl = (obArray[numClicked].media.m).replace("_m.jpg", ".jpg");
 						
-						loadImage(largeUrl);
+						setTimeout(loadImage, 2000, largeUrl);
 
 						new TWEEN.Tween( intersects[ 0 ].object.position ).to( {
 							x: 0,
@@ -366,12 +392,6 @@
 				renderer.render(scene, camera);
 				//camera.position.x += (((mouseX-(canvasWidth * .5))*2)-camera.position.x )*.05;
 	      //camera.position.y += (((mouseY-(canvasHeight*.5))*2)-camera.position.y )*.05;
-				
-				$('#cubeContainer').css({'z-index' : '500'});
-				$('#nameInput').css({'z-index' : '900'}); 
-				
-				//uncomment below for stats 
-				//stats.update();
 			}
 			
 			function loadImage(imUrl){
@@ -380,10 +400,34 @@
 
       	$(img).load(function () {
       	  largeContainer.html(this);
-          $(this).fadeIn();
+      	  
+      	  var tw = 0;
+      	  var th = 0;
+      	  
+      	  if($('#largeContainer img').width() > $('#largeContainer img').height()){
+      	    tw = (104/$('#largeContainer img').height()) * $('#largeContainer img').width(); 
+        	  th = 104;
+      	  }else if($('#largeContainer img').height() >= $('#largeContainer img').width()){
+      	    tw = 104;
+      	    th = (104/$('#largeContainer img').width()) * $('#largeContainer img').height();
+      	  }
+      	  
+      	  $('#largeContainer img').css({'position' : 'absolute', 'left' : 52 - (tw/2) + 'px', 'top' : 52 - (th/2) + 'px', 'width' : tw + 'px', 'height' : th + 'px'});
+      	  
+          onResize();
+          
         });
 
       	$(img).attr('src', imUrl);
+    }
+    
+    $(window).resize(function(){
+      onResize();
+    });
+    
+    function onResize(){
+      var contPos = container.position();
+      largeContainer.css({'left' : (($(window).width() / 2) - 51) + 'px', 'top' : '-51px'});
     }
 
 		</script>
