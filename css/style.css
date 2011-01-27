@@ -1,0 +1,16 @@
+html,body{font-family:"Helvetica",Arial,sans-serif;font-size:12px;margin:0px;overflow:hidden;min-width:1000px;min-height:660px;height:100%;width:100%;background:-moz-radial-gradient(50% 50%,farthest-side,#CCC,#9f9f9f);background:-webkit-gradient(radial,50% 50%,0,50% 50%,350,from(#ccc),to(#9f9f9f));}
+a:link,a:visited{color:#000;}
+a:hover{color:#ff0084;}
+input[type="text"]{outline:0px none;float:left;position:absolute;left:90px;width:155px;margin-top:-1px;}
+input[type="submit"]{float:left;position:absolute;left:230px;}
+#idInput{display:block;position:fixed;top:20px;left:20px;z-index:900;width:300px;height:75px;}
+#idGettrLink{display:block;margin:40px 0px 0px 0px;}
+#container{position:absolute;top:50%;left:0px;width:100%;height:1px;overflow:visible;z-index:400;}
+#cubeContainer{width:1000px;height:1000px;margin-left:-500px;position:absolute;top:-500px;left:50%;}
+#largeContainer{position:absolute;width:102px;height:102px;overflow:hidden;}
+#loaderContainer{width:31px;height:31px;margin-left:-15.5px;position:absolute;top:-15.5px;left:50%;}
+#idSubmitButton{position:absolute;left:260px;}
+#sliderContainerX{width:200px;height:20px;position:absolute;z-index:900;top:500px;left:500px;}
+#sliderContainerY{width:20px;height:200px;position:absolute;z-index:800;top:500px;left:500px;}
+.ui-slider-handle{outline:none;}
+.ui-slider-vertical{height:200px;}
