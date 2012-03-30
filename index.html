@@ -144,7 +144,8 @@
 				// Now start cycling through our array of flickr photo details
 				$.each(data.items, function(i,item){
 					obArray.push(item);
-					var thumbUrl = (item.media.m).replace("_m.jpg", "_s.jpg");
+					var thumbUrl = (item.media.m);
+					console.log(item.media.m)
 					urls.push(thumbUrl);
 				});
 
@@ -375,8 +376,6 @@
 			function loop() {
 				TWEEN.update();
 				renderer.render(scene, camera);
-				//camera.position.x += (((mouseX-(canvasWidth * .5))*2)-camera.position.x )*.05;
-				//camera.position.y += (((mouseY-(canvasHeight*.5))*2)-camera.position.y )*.05;
 			}
 			
 			
@@ -516,5 +515,16 @@
 		}
 
 		</script>
+		
+		<script type="text/javascript">
+			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+			document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+			</script>
+			<script type="text/javascript">
+			var pageTracker = _gat._getTracker("UA-2361692-11");
+			pageTracker._initData();
+			pageTracker._trackPageview();
+		</script>
+		
 	</body>
 </html>
